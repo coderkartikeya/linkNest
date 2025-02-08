@@ -9,6 +9,10 @@ const chatGroupSchema = new mongoose.Schema({
     updatedOn: { type: Date },
     messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
     isDeleted: { type: Boolean, default: false },
+    ProfilePic:{
+        type:String,
+        default:""
+    }
     
 });
 

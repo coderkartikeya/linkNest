@@ -30,7 +30,7 @@ const userSchema= new mongoose.Schema({
         lowercase:true,
         
     },
-    userName:{
+    username:{
         type:String,
         required:true,
         trim:true,
@@ -47,7 +47,7 @@ const userSchema= new mongoose.Schema({
     },
     gender:{
         type:String,
-        required:true,
+        // required:true,
         trim:true,
 
     },
@@ -67,7 +67,7 @@ const userSchema= new mongoose.Schema({
     },
     profilePic:{
         type:String,
-        default:"default.jpg",
+        required:true
 
     },
     communities:[
@@ -89,19 +89,19 @@ const userSchema= new mongoose.Schema({
     location:{
         ipAddress:{
             type:String,
-            required:true,
+            // required:true,
         },
         city:{
             type:String,
-            required:true,
+            // required:true,
         },
         country:{
             type:String,
-            required:true,
+            // required:true,
         },
         state:{
             type:String,
-            required:true,
+            // required:true,
         }
 
     },
@@ -123,7 +123,7 @@ userSchema.pre("save",async function (next){
 
 // custom method
 
-userSchema.method.isPasswordCorrect=async function(password){
+userSchema.methods.isPasswordCorrect=async function(password){
     return await bcrypt.compare(password,this.password);
 }
 

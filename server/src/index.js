@@ -7,11 +7,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 dotenv.config();
 
-app.use(cors());
-app.use(express.json({limit:'16kb'}));// 
-app.use(express.urlencoded({extended:true,limit:"16kb"}))// url se bhi data ayega uske liye h 
-app.use(cookieParser());// cookies read karne ke liye
-app.use(express.static("public"))
+
 const port=process.env.PORT || 3001
 
 

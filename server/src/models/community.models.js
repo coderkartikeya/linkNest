@@ -1,40 +1,42 @@
 import mongoose from 'mongoose';
 
 const communitySchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true,unique:true },
     createdOn: { type: Date, default: Date.now },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    group:{type:mongoose.Schema.Types.ObjectId,ref:'ChatGroup',required:true},
     location:{
         ipAddress:{
-            type:String,
-            required:true            
+            lat:Number,
+            lng:Number
+            // required:true            
         },
         city:{
             type:String,
-            required:true
+            // required:true
         },
         state:{
             type:String,
-            required:true
+            // required:true
             },
         country:{
             type:String,
-            required:true
+            // required:true
         }
 
     },
     members:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
-        required:true
     }],
     description:{
         type:String,
         required:true
     },
-    image:{
+    profileImage:{
         type:String,
+        required:true
     },
     isPrivate:{
         type:Boolean,
@@ -51,6 +53,8 @@ const communitySchema = new mongoose.Schema({
     
     
 });
+
+
 
 const Community = mongoose.model('Community', communitySchema);
 export default Community;
