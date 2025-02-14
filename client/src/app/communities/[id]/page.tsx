@@ -93,7 +93,7 @@ const CommunityPage = () => {
 
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:8000/api/v1/community/byId`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/byId`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ const CommunityPage = () => {
         formData.append('profileImage', selectedFile);
       }
 
-      const response = await fetch(`http://localhost:8000/api/v1/community/savePost`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/savePost`, {
         method: 'POST',
         body: formData,
       });
@@ -182,7 +182,7 @@ const CommunityPage = () => {
     if (!community || !user || community.owner !== user.data.user._id) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/community/${communityId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/${communityId}`, {
         method: 'DELETE',
       });
 

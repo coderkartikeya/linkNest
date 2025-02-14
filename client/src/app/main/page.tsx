@@ -93,7 +93,7 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v1/community/allposts');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/allposts`);
         const data = await response.json();
         // console.log(data);
         if (!response.ok) {
@@ -219,7 +219,7 @@ const Page: React.FC = () => {
                     className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
                     onClick={(e) => {
                       e.stopPropagation();
-                      router.push(`http://localhost:8000/api/v1/community/${post._id}`);
+                      router.push(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/${post._id}`);
                     }}
                   >
                     <MessageCircle className="w-5 h-5" />
@@ -232,7 +232,7 @@ const Page: React.FC = () => {
                       navigator.share?.({
                         title: post.ownerName,
                         text: post.content,
-                        url: `http://localhost:8000/api/v1/community/${post._id}`
+                        url: `${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/${post._id}`
                       });
                     }}
                   >

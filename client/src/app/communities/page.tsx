@@ -73,7 +73,7 @@ const Page = () => {
       if (!user?.data.user._id) return;
 
       try {
-        const response = await fetch(`http://localhost:8000/api/v1/community/byMember`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/byMember`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const Page = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/community/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/register`, {
         method: 'POST',
         body: formDataToSend
       });

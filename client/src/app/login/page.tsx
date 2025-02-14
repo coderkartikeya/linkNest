@@ -8,6 +8,8 @@ import { useUserContext } from '@/context/UserContext';
 // import Router from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
+
+
 export default function Login() {
   const[username,setUserName]=useState('');
   const[password,setPassword]=useState('');
@@ -15,13 +17,14 @@ export default function Login() {
   const {setUserContext}=useUserContext();
   // const {setUsername,setFullName,setEmail,setRefreshToken,setAcessToken,setProfilePic,createdOn}=useUserContext();
   const router=useRouter();
+  // console.log(process.env.NEXT_PUBLIC_ADDRESS)
 
   const handleSubmit = async (e:any) => {
     e.preventDefault();
     try {
       
 
-      const response= await fetch('http://localhost:8000/api/v1/users/login',{
+      const response= await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/users/login`,{
         method:'POST',
         headers: { 'Content-Type': 'application/json' },
         body:JSON.stringify({username,password})

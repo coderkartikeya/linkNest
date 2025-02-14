@@ -6,7 +6,12 @@ import cookieParser from 'cookie-parser'
 dotenv.config();
 
 const app=express();
-app.use(cors());
+const allowedOrigins = ['http://localhost:3000', 'https://link-nest-backend.vercel.app/'];
+app.use(cors({
+    origin: allowedOrigins,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true
+  }));
 app.use(express.json({limit:'16kb'}));// 
 app.use(express.urlencoded({extended:true,limit:"16kb"}))// url se bhi data ayega uske liye h 
 app.use(cookieParser());// cookies read karne ke liye

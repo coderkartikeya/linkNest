@@ -11,6 +11,7 @@ const FormComponent = () => {
     password: '',
     profilePic: null,
   });
+  const [worker, setWorker] = useState<Worker | null>(null);
   // creation of router to push on login screen when profile is created
   const router=useRouter();
   const handleChange = (e:any) => {
@@ -45,7 +46,7 @@ const FormComponent = () => {
     }
     
         
-        const response=await fetch('http://localhost:8000/api/v1/users/register',{
+        const response=await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/users/register`,{
             method:'POST',
             body:formDataToSend,            
         })
