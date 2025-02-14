@@ -6,7 +6,7 @@ import Community from "../models/community.models.js"
 import { User} from "../models/User.models.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import ChatGroup from "../models/chatGroup.models.js";
-
+import Post from "../models/post.modules.js";
 const registerCommunity=asyncHandler(async (req,res)=>{
     // getting the data from frontend
     // check if it's non empty
@@ -16,6 +16,7 @@ const registerCommunity=asyncHandler(async (req,res)=>{
     // response return karo
     const {name,owner,location,description,category}=req.body;
     // console.log(req.file);
+    // console.log(owner);
     if([name,owner,description,category].some((field)=>field?.trim()==="")){
         throw new ApiError(400,"all fields are required");
     }
@@ -39,14 +40,14 @@ const registerCommunity=asyncHandler(async (req,res)=>{
     // saving the group
     const chatGroup =await  ChatGroup.create({
         name: name,
-        admin: user._id,
-        members: [user._id]
+        admin: user,
+        members: [user]
     })
     await chatGroup.save();
     // save the community to the database
     const newCommunity=await Community.create({
         name,
-        owner:user._id,
+        owner:user,
         profileImage:imageUploaded.url,
         description,
         category,
@@ -178,11 +179,11 @@ const getCommunitiesByUser = asyncHandler(async (req, res) => {
     }
 
     // Find all communities created by the user
-    const communities = await Community.find({ owner: userId }).populate('owner', 'username');
+    const communities = await Community.find({ owner: userId });
     
-    if (!communities || communities.length === 0) {
-        throw new ApiError(404, "No communities found for this user");
-    }
+    // if (!communities) {
+    //     throw new ApiError(404, "No communities found for this user");
+    // }
 
     res.json(new ApiResponse(200, "Community updated successfully", communities));
 });
@@ -191,13 +192,69 @@ const communitByid=asyncHandler(async(req,res)=>{
     const {id}=req.body;
     // console.log(req.body)
     const community=await Community.findById(id);
+
     // console.log(id);
         if(!community){
             throw new ApiError(404, "Community not found");
             }
+        const posts=await Post.find({community:community._id});
+        community.posts=posts;
+        // console.log(posts)
+
         
             res.json(new ApiResponse(200, "Community found successfully", community));
 })
+const communityPost = asyncHandler(async (req, res) => {
+    const { community, text, likes, date, user } = req.body;
+    
+    const usr=await User.findById(user);
+    if(!usr){
+        throw new ApiError(404, "User not found");
+        }
+    
+
+    const c = await Community.findById(community);
+    if (!c) {
+        throw new ApiError(404, "Community not found");
+    }
+    
+    const imagep = req.file?.path;
+
+    const profile = imagep ? await uploadOnCloudinary(imagep) : '';
+
+    const post = await Post.create({
+        content: text,
+        picture: profile.url,
+        likes: likes,
+        community: c._id,
+        owner: usr,
+        ownerName:usr.fullName,
+        date: new Date(),
+        communityName:c.name
+    });
+    
+    const newPost = await Post.findById(post._id);  // populate user field to get details
+    
+    if (!newPost) {
+        throw new ApiError(404, "Post not found");
+    }
+    c.posts.push(newPost);
+    await c.save();
+    
+    res.json(new ApiResponse(200, "Post created successfully"));
+});
+const communityPostsAll=asyncHandler(async (req,res)=>{
+    const posts = await Post.find({});
+    res.json(new ApiResponse(200, "Posts found successfully", posts));
+})
+const postByOwnerId=asyncHandler(async (req,res)=>{
+
+    const {id,name}=req.body;
+    console.log(name)
+    const posts = await Post.find({});
+    res.json(new ApiResponse(200, "Posts found successfully", posts));
+})
+
 
 
 
@@ -212,7 +269,10 @@ export{
     addMemberToCommunity,
     removeMemberFromCommunity,
     getCommunitiesByUser,
-    communitByid
+    communitByid,
+    communityPost,
+    communityPostsAll,
+    postByOwnerId
 
 
 }

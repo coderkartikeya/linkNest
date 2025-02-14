@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 import ResponsiveTabBar from '../components/TabBar';
 
 interface User {
+  _id:string;
   fullName: string;
   username: string;
   profilePic: string;
   accessToken: string;
   refreshToken: string;
-  
   dateCreatedAt: Date;
 }
 
@@ -16,32 +16,49 @@ interface UserData {
   user: User;
 }
 
-interface AuthenticatedUser {
+interface AuthenticatedUser  {
   data: UserData;
 }
 
 const Page = () => {
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [user, setUser ] = useState<AuthenticatedUser  | null>(null);
   const [editing, setEditing] = useState(false);
   const [updatedName, setUpdatedName] = useState('');
   const [updatedProfilePic, setUpdatedProfilePic] = useState<string | null>(null);
   const [joiningDate, setJoiningDate] = useState('');
+  const [posts, setPosts] = useState<string[]>([]); // Sample posts
 
   useEffect(() => {
     try {
       const data = localStorage.getItem('user');
       if (data) {
-        const parsedUser = JSON.parse(data);
-        setUser(parsedUser);
-        setUpdatedName(parsedUser.data.user.fullName);
-        setUpdatedProfilePic(parsedUser.data.user.profilePic);
-        setJoiningDate(parsedUser.data.user.joiningDate || 'Unknown');
+        const parsedUser  = JSON.parse(data);
+        setUser (parsedUser );
+        setUpdatedName(parsedUser .data.user.fullName);
+        setUpdatedProfilePic(parsedUser .data.user.profilePic);
+        setJoiningDate(parsedUser .data.user.dateCreatedAt || 'Unknown');
       }
     } catch (error) {
       console.error('Error loading user data:', error);
     }
   }, []);
-  
+  useEffect(()=>{
+    const func=async()=>{
+      const response = await fetch('http://localhost/api/v1/community/selectedPosts',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ownerId: user?.data.user._id})       
+
+      });
+      const data = await response.json();
+      setPosts(data);
+      
+    }
+    func();
+  },[])
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -56,7 +73,7 @@ const Page = () => {
   const handleSaveChanges = () => {
     try {
       if (user) {
-        const updatedUser = {
+        const updatedUser  = {
           ...user,
           data: {
             user: {
@@ -66,8 +83,8 @@ const Page = () => {
             },
           },
         };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser (updatedUser );
+        localStorage.setItem('user', JSON.stringify(updatedUser ));
         setEditing(false); // Exit edit mode
       }
     } catch (error) {
@@ -83,12 +100,12 @@ const Page = () => {
       </div>
 
       {/* Main Content */}
-      <div className="bg-white w-full md:m-6 m-4 md:p-6 p-4 rounded-xl shadow-md">
+      <div className="bg-white w-full md:m-6 m-4 md:p-6 p-4 rounded-xl shadow-lg">
         {/* User Info Section */}
         <div className="flex flex-col md:flex-row items-start md:gap-8 gap-6">
           {/* Profile Picture */}
-          <div className="bg-gray-200 rounded-lg shadow-lg p-4 flex md:w-[500px] w-full">
-            {updatedProfilePic && updatedProfilePic !== '' && (
+          <div className="bg-gray-200 rounded-lg shadow-lg p-4 flex md:w-[300px] w-full">
+            {updatedProfilePic && (
               <img
                 src={updatedProfilePic}
                 alt={`${updatedName}'s profile`}
@@ -155,6 +172,22 @@ const Page = () => {
                   Edit Profile
                 </button>
               </>
+            )}
+          </div>
+        </div>
+
+        {/* Community Posts Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Community Posts</h2>
+          <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+            {posts.length > 0 ? (
+              posts.map((post, index) => (
+                <div key={index} className="border-b border-gray-200 py-2">
+                  <p className="text-gray-800">{post}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No posts available.</p>
             )}
           </div>
         </div>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Send, PaperclipIcon, X, Menu, ChevronLeft, ChevronRight, BackpackIcon, StepBack } from 'lucide-react';
+import { Send, PaperclipIcon, X, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import ResponsiveTabBar from '@/app/components/TabBar';
 import ChatC from '@/app/components/ChatC';
 
@@ -22,15 +22,17 @@ interface UserData {
   user: User;
 }
 
-interface AuthenticatedUser {
+interface AuthenticatedUser  {
   data: UserData;
 }
 
 interface Message {
-  user: string;
-  message: string;
+  ownerName: string;
+  owner: string;
+  content: string;
   date: Date;
-  image?: string;
+  picture?: string;
+  createdAt: Date;
 }
 
 interface Community {
@@ -51,46 +53,15 @@ interface Community {
 
 const CommunityPage = () => {
   // States
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [user, setUser ] = useState<AuthenticatedUser  | null>(null);
   const [community, setCommunity] = useState<Community | null>(null);
-  const [messages, setMessages] = useState<Message[]>( [
-    {
-        user: "John Doe",
-        message: "Hello, how are you?",
-        date: new Date(),
-        image: ""
-    },
-    {
-        user: "Jane Smith",
-        message: "I'm good, thanks!",
-        date: new Date()
-    },
-    {
-      user: "Jane Smith",
-      message: "I'm good, thanks!",
-      date: new Date()
-  },
-  {
-    user: "Jane Smith",
-    message: "I'm good, thanks!",
-    date: new Date()
-},
-{
-  user: "Jane Smith",
-  message: "I'm good, thanks!",
-  date: new Date()
-},
-{
-  user: "Jane Smith",
-  message: "I'm good, thanks!",
-  date: new Date()
-}
-]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // Track if the user is an admin
 
   const router = useRouter();
   const pathname = usePathname();
@@ -98,11 +69,11 @@ const CommunityPage = () => {
 
   // Load user data
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser  = () => {
       try {
         const userData = localStorage.getItem('user');
         if (userData) {
-          setUser(JSON.parse(userData));
+          setUser (JSON.parse(userData));
         } else {
           router.push('/login');
         }
@@ -112,7 +83,7 @@ const CommunityPage = () => {
       }
     };
 
-    loadUser();
+    loadUser ();
   }, [router]);
 
   // Fetch community data
@@ -133,9 +104,14 @@ const CommunityPage = () => {
         if (!response.ok) throw new Error('Failed to fetch community');
 
         const data = await response.json();
+        
         if (data.message) {
           setCommunity(data.message);
-          setMessages(data.messages || []);
+          setMessages(data.message.posts || []);
+          // Check if the current user is the admin
+          if (data.message.owner === user?.data.user._id) {
+            setIsAdmin(true);
+          }
         }
       } catch (err) {
         console.error('Error fetching community:', err);
@@ -146,7 +122,7 @@ const CommunityPage = () => {
     };
 
     fetchCommunity();
-  }, [communityId]);
+  }, [communityId, user]);
 
   // Handlers
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,12 +145,15 @@ const CommunityPage = () => {
     try {
       const formData = new FormData();
       formData.append('text', newMessage);
-      formData.append('userId', user.data.user._id);
+      formData.append('user', user.data.user._id);
+      formData.append('community', communityId);
+      
+
       if (selectedFile) {
-        formData.append('image', selectedFile);
+        formData.append('profileImage', selectedFile);
       }
 
-      const response = await fetch(`http://localhost:8000/api/v1/community/${communityId}/message`, {
+      const response = await fetch(`http://localhost:8000/api/v1/community/savePost`, {
         method: 'POST',
         body: formData,
       });
@@ -183,10 +162,12 @@ const CommunityPage = () => {
 
       // Add new message to the list
       const newMsg: Message = {
-        user: user.data.user.fullName,
-        message: newMessage,
+        ownerName: user.data.user.fullName,
+        owner: user.data.user._id,
+        content: newMessage,
         date: new Date(),
-        image: selectedFile ? URL.createObjectURL(selectedFile) : undefined,
+        picture: selectedFile ? URL.createObjectURL(selectedFile) : undefined,
+        createdAt: new Date(),
       };
 
       setMessages(prev => [...prev, newMsg]);
@@ -233,71 +214,69 @@ const CommunityPage = () => {
     <div className={`h-screen bg-gray-100 flex overflow-y-auto scrollbar-hide`}>
       {/* Header */}
       <div className='h-screen'>
-        <ResponsiveTabBar/>
+        <ResponsiveTabBar />
       </div>
 
-      <div className='bg-white w-full md:m-6 m-4 md:p-6 p-4 rounded-xl shadow-md  '>
-        
-        <div className='flex justify-between '>
-          <button
-          onClick={()=>router.back()}
-          >
-            <ChevronLeft/>
+      <div className='bg-white w-full md:m-6 m-4 md:p-6 p-4 rounded-xl shadow-md'>
+        <div className='flex justify-between'>
+          <button onClick={() => router.back()}>
+            <ChevronLeft />
           </button>
           <h2 className="md:text-3xl text-2xl font-bold">{community.name}</h2>
           <button 
-          className="text-500 hover:text-red-700 transition duration-300 ease-in-out"
-          onClick={()=>setIsInfoPanelOpen(!isInfoPanelOpen)}
+            className="text-500 hover:text-red-700 transition duration-300 ease-in-out"
+            onClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
           >
-            <Menu/>
+            <Menu />
           </button>
         </div>
-        <div className={`${selectedFile?`h-[68vh]`:`h-[75vh]`} overflow-y-scroll scrollbar-hide`}>
-          {user && <ChatC messages={messages} user={user}/>}
+        <div className={`${selectedFile ? `h-[68vh]` : `h-[73vh]`} w-full overflow-y-scroll scrollbar-hide`}>
+          {user && <ChatC messages={messages} user={user} />}
         </div>
-        <div className=' bg-white border-t p-2 md:p-4 '>
-        {selectedFile && (
-            <div className="mb-2 p-2 bg-blue-50 rounded-lg flex items-center gap-2">
-              <span className="text-xs md:text-sm text-blue-600 truncate flex-1">
-                {selectedFile.name}
-              </span>
+        {isAdmin && ( // Only show this section if the user is the admin
+          <div className="bg-white border-t p-2 md:p-2 mb-20">
+            {selectedFile && (
+              <div className="mb-2 p-2 bg-blue-50 rounded-lg flex items-center gap-2">
+                <span className="text-xs md:text-sm text-blue-600 truncate flex-1">
+                  {selectedFile.name}
+                </span>
+                <button
+                  onClick={() => setSelectedFile(null)}
+                  className="p-1 hover:bg-blue-100 rounded-full"
+                >
+                  <X size={16} className="text-blue-600" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-end gap-2">
+              <div className="flex-1 relative">
+                <textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="w-full text-sm md:text-base resize-none rounded-lg pl-3 pr-10 py-2 focus:outline-none border focus:ring-2 focus:ring-blue-500 min-h-[40px] md:min-h-[45px]"
+                  rows={1}
+                  onKeyPress={handleKeyPress}
+                />
+                <label className="absolute right-2 bottom-2 cursor-pointer">
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                  />
+                  <PaperclipIcon size={20} className="text-gray-400 hover:text-blue-500" />
+                </label>
+              </div>
               <button
-                onClick={() => setSelectedFile(null)}
-                className="p-1 hover:bg-blue-100 rounded-full"
+                onClick={handleSendMessage}
+                className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors"
               >
-                <X size={16} className="text-blue-600" />
+                <Send size={18} className="md:w-5 md:h-5" />
               </button>
             </div>
-          )}
-          <div className="flex items-end gap-2">
-            <div className="flex-1 relative">
-              <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                
-                placeholder="Type a message..."
-                className="w-full text-sm md:text-base resize-none rounded-lg pl-3 pr-10 py-2 focus:outline-none border focus:ring-2 focus:ring-blue-500 min-h-[40px] md:min-h-[45px]"
-                rows={1}
-              />
-              <label className="absolute right-2 bottom-2 cursor-pointer">
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                />
-                <PaperclipIcon size={20} className="text-gray-400 hover:text-blue-500" />
-              </label>
-            </div>
-            <button
-              onClick={handleSendMessage}
-              className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors"
-            >
-              <Send size={18} className="md:w-5 md:h-5" />
-            </button>
           </div>
-        </div>
-        
+        )}
       </div>
 
       <div className={`
@@ -374,11 +353,9 @@ const CommunityPage = () => {
                 )}
               </div>
             </div>
-            </div>
-            </div>
-            </div>
-      
-      
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

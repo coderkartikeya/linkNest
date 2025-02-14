@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { div } from 'framer-motion/client';
 
 const containerStyle = {
   width: '100%',
@@ -14,6 +15,7 @@ const defaultCenter = {
 
 const GoogleMapComponent = () => {
   const [center, setCenter] = useState(defaultCenter);
+  
 
   useEffect(() => {
     function getLocation() {
@@ -24,7 +26,7 @@ const GoogleMapComponent = () => {
       }
     }
   
-    function showPosition(position) {
+    function showPosition(position:any) {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
       if (typeof lat === 'number' && typeof lng === 'number') {
@@ -36,7 +38,7 @@ const GoogleMapComponent = () => {
       }
     }
   
-    function showError(error) {
+    function showError(error:any) {
       console.error(`Geolocation error: ${error.message}`);
       alert("Unable to fetch location. Using default location.");
       setCenter(defaultCenter);
@@ -82,9 +84,14 @@ const GoogleMapComponent = () => {
 };
 
 const MyApp = () => (
+  <div>
+    
+
+  
   <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
     <GoogleMapComponent />
   </LoadScript>
+  </div>
 );
 
 export default MyApp;

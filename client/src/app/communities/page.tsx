@@ -45,6 +45,7 @@ const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     description: "",
@@ -63,32 +64,43 @@ const Page = () => {
       }
     } catch (error) {
       console.error("Error loading user data:", error);
+      setError("Failed to load user data");
     }
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-
     const fetchCommunities = async () => {
+      if (!user?.data.user._id) return;
+
       try {
         const response = await fetch(`http://localhost:8000/api/v1/community/byMember`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user?.data.user._id })
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ userId: user.data.user._id })
         });
 
-        const rs = await response.json();
-        if (Array.isArray(rs.message)) {
-          setCommunities(rs.message);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (Array.isArray(data.message)) {
+          setCommunities(data.message);
         } else {
           setCommunities([]);
         }
       } catch (error) {
         console.error("Error fetching communities:", error);
+        setError("Failed to fetch communities");
       }
     };
 
-    fetchCommunities();
+    if (user) {
+      fetchCommunities();
+    }
   }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -105,11 +117,11 @@ const Page = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name);
     formDataToSend.append("description", formData.description);
-    
     formDataToSend.append("owner", formData.owner);
     formDataToSend.append("category", formData.category);
     if (formData.profileImage) {
@@ -117,14 +129,19 @@ const Page = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/community/register',{
+      const response = await fetch('http://localhost:8000/api/v1/community/register', {
         method: 'POST',
         body: formDataToSend
-      })
+      });
 
-      alert("Community created successfully!");
-      console.log(await response.json());
-      // setCommunities(prev => [...prev, response.data]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Refresh communities list
+      setCommunities(prev => [...prev, data]);
       setIsModalOpen(false);
       setFormData({
         name: "",
@@ -133,11 +150,12 @@ const Page = () => {
         category: "",
         profileImage: null,
       });
+      alert("Community created successfully!");
     } catch (error) {
       console.error("Error creating community:", error);
-      alert("Error creating community. Please try again.");
+      setError("Failed to create community. Please try again.");
     }
-};
+  };
 
   return (
     <div className="relative">

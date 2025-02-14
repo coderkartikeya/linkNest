@@ -54,7 +54,7 @@ export default function ResponsiveTabBar() {
       </div>
 
       {/* Mobile (Bottom Tab Bar) */}
-      <div className="fixed bottom-0 left-0 w-full bg-white md:hidden shadow-lg">
+      <div className="fixed bottom-0 left-0 w-full bg-white md:hidden shadow-lg z-30">
         <div className="flex justify-around p-3 ">
           {tabs.map((tab) => (
             <button

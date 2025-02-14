@@ -1,6 +1,6 @@
 import express from 'express'
 import { upload } from '../middlewares/multer.middlewares.js';
-import { addMemberToCommunity, communitByid, getAllCommunities, getCommunitiesByCategory, getCommunitiesByUser, registerCommunity, updateCommunityByName } from '../controllers/community.controllers.js';
+import { addMemberToCommunity, communitByid, communityPost, communityPostsAll, getAllCommunities, getCommunitiesByCategory, getCommunitiesByUser, postByOwnerId, registerCommunity, updateCommunityByName } from '../controllers/community.controllers.js';
 
 
 const router=express.Router();
@@ -12,6 +12,9 @@ router.route('/category').post(getCommunitiesByCategory)
 router.route('/addMember').post(addMemberToCommunity);
 router.route('/byMember').post(getCommunitiesByUser);
 router.route('/byId').post(communitByid);
+router.route('/savePost').post(upload.single('profileImage'),communityPost)
+router.route('/allposts').get(communityPostsAll);
+router.route('/selectedPosts').post(postByOwnerId)
 
 export default router;
 
