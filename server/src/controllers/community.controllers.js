@@ -88,7 +88,8 @@ const updateCommunityByName = asyncHandler(async (req, res) => {
 
 const getAllCommunities = asyncHandler(async (req, res) => {
     const communities = await Community.find().populate('owner', 'username');
-    res.json(communities);
+    res.json(new ApiResponse(200,"all coummunities",communities));
+
 });
 const getCommunitiesByCategory = asyncHandler(async (req, res) => {
     const { category } = req.query;
@@ -250,10 +251,20 @@ const communityPostsAll=asyncHandler(async (req,res)=>{
 const postByOwnerId=asyncHandler(async (req,res)=>{
 
     const {id,name}=req.body;
-    console.log(name)
+    console.log(req.body)
     const posts = await Post.find({});
     res.json(new ApiResponse(200, "Posts found successfully", posts));
 })
+const deleteCommunity=asyncHandler(async (req,res)=>{
+    const {id}=req.body;
+    const community = await Community.findById(id);
+    if (!community) {
+        throw new ApiError(404, "Community not found");
+    }
+    await community.deleteOne({_id:id});
+    res.json(new ApiResponse(200, "Community deleted successfully"));
+})
+
 
 
 
@@ -272,7 +283,8 @@ export{
     communitByid,
     communityPost,
     communityPostsAll,
-    postByOwnerId
+    postByOwnerId,
+    deleteCommunity
 
 
 }

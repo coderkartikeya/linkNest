@@ -182,8 +182,13 @@ const CommunityPage = () => {
     if (!community || !user || community.owner !== user.data.user._id) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/${communityId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/deleteCommuntiy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: community._id,user_id:user.data.user._id }
+            ),
       });
 
       if (!response.ok) throw new Error('Failed to delete community');

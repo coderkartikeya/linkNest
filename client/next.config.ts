@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+       config.output.publicPath = "";
+    }
+    return config;
+ }
 };
 
 export default nextConfig;

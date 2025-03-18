@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Share2, Clock, Inbox } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ResponsiveTabBar from '../components/TabBar';
+import { error } from 'console';
 
 
 interface User {
@@ -35,6 +36,8 @@ interface Post {
   comments?: number;
   community:string;
 }
+
+
 
 const TimeAgo = ({ date }: { date: Date }) => {
   const getTimeAgo = (date: Date) => {
@@ -73,7 +76,7 @@ const Page: React.FC = () => {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
-  const worker = new Worker('/worker.js');
+  // const worker = new Worker('/worker.js');
 
   useEffect(() => {
     const data = localStorage.getItem('user');
@@ -99,11 +102,13 @@ const Page: React.FC = () => {
         if (!response.ok) {
           throw new Error(`HTTP Error: ${response.status} - ${data.message}`);
         }
+        const worker=new Worker(new URL('../worker/worker.ts', import.meta.url))
         worker.onmessage = function (e) {
           setPosts(e.data);
         };
         
         worker.postMessage(data.message);
+        // setPosts(data);
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
