@@ -78,7 +78,9 @@ const userSchema= new mongoose.Schema({
         }
     ],
     conversations: [
-        { conversationSchema }, 
+        { type:Schema.Types.ObjectId,
+            ref:"ChatGroup"
+         }, 
     ],
     posts:[
         {

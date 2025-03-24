@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, User, TrendingUp, Users, CompassIcon } from 'lucide-react';
+import { Home, User, TrendingUp, Users, CompassIcon, LogInIcon, LogOutIcon } from 'lucide-react';
 
 export default function ResponsiveTabBar() {
   const router = useRouter();
@@ -14,6 +14,8 @@ export default function ResponsiveTabBar() {
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Trending', href: '/trending', icon: TrendingUp },
     { name: 'Communities', href: '/communities', icon: Users },
+    { name: 'Logout', href: '/login', icon: LogOutIcon },
+    
   ];
 
   // Sync activeTab with the current route
@@ -23,6 +25,9 @@ export default function ResponsiveTabBar() {
   }, [pathname]);
 
   const handleTabClick = (href:any) => {
+    if(href=='/login'){
+      localStorage.clear();
+    }
     router.push(href); // Navigate to the route
   };
 

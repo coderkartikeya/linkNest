@@ -41,7 +41,8 @@ const registerCommunity=asyncHandler(async (req,res)=>{
     const chatGroup =await  ChatGroup.create({
         name: name,
         admin: user,
-        members: [user]
+        members: [user],
+        ProfilePic:imageUploaded.url
     })
     await chatGroup.save();
     // save the community to the database
@@ -55,11 +56,13 @@ const registerCommunity=asyncHandler(async (req,res)=>{
         group:chatGroup._id
     })
     const newCommunityUploaded=await Community.findById(newCommunity._id);
+    await user.updateOne({})
     
     if(!newCommunityUploaded){
         throw new ApiError(500,"something went wrong try again ");
     }
     user.communities.push(newCommunity._id);
+    user.conversations.push(chatGroup._id);
     await user.save();
     // return the response
     res.json(
@@ -248,13 +251,7 @@ const communityPostsAll=asyncHandler(async (req,res)=>{
     const posts = await Post.find({});
     res.json(new ApiResponse(200, "Posts found successfully", posts));
 })
-const postByOwnerId=asyncHandler(async (req,res)=>{
 
-    const {id,name}=req.body;
-    console.log(req.body)
-    const posts = await Post.find({});
-    res.json(new ApiResponse(200, "Posts found successfully", posts));
-})
 const deleteCommunity=asyncHandler(async (req,res)=>{
     const {id}=req.body;
     const community = await Community.findById(id);
@@ -265,9 +262,15 @@ const deleteCommunity=asyncHandler(async (req,res)=>{
     res.json(new ApiResponse(200, "Community deleted successfully"));
 })
 
-
-
-
+const getMessage=asyncHandler(async(req,res)=>{
+    const {id}=req.body;
+    const group = await ChatGroup.findById(id);
+    if (!group) {
+        throw new ApiError(404, "Message not found");
+    }
+    res.json(new ApiResponse(200,"Group found",group));    
+    
+})
 
 
 
@@ -283,8 +286,8 @@ export{
     communitByid,
     communityPost,
     communityPostsAll,
-    postByOwnerId,
-    deleteCommunity
+    deleteCommunity,
+    getMessage
 
 
 }

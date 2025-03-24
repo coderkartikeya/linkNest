@@ -3,6 +3,8 @@ import {ApiError} from '../utils/ApiError.js'
 import { User } from '../models/User.models.js'
 import { ApiResponse } from '../utils/ApiResponse.js'
 import { uploadOnCloudinary } from '../utils/cloudinary.js'
+import ChatGroup from '../models/chatGroup.models.js'
+import Post from '../models/post.modules.js'
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
@@ -99,7 +101,7 @@ const loginUser = asyncHandler(async (req, res) =>{
     //send cookie
 
     const {email, username, password} = req.body
-    console.log(email);
+    // console.log(email);
 
     // if (!username && !email) {
     //     throw new ApiError(400, "username or email is required")
@@ -174,9 +176,42 @@ const logoutUser = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
+const getChatGroup = asyncHandler(async (req, res) => {
+    // console.log(req);
+    const { name } =  req.body;
+
+    // Validate username
+    if (!name?.trim()) {
+        return res.status(400).json(new ApiResponse(400, {}, "Username is required"));
+    }
+
+    // console.log(name);
+
+    // Find user by username
+    const user = await User.findOne({ username: name });
+    if (!user) {
+        return res.status(404).json(new ApiResponse(404, {}, "User not found"));
+    }
+
+    // Find groups where user is a member
+    const groups = await ChatGroup.find({ members: user._id }).populate('members');
+
+    // Return the groups as response
+    return res.status(200).json(new ApiResponse(200, groups, "Groups Retrieved Successfully"));
+});
+
+const postById = asyncHandler(async(req,res)=>{
+    const {id}=req.body;
+    console.log(id);
+    res.json(new ApiResponse(200,"success"));
+})
+
+
 export {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    getChatGroup,
+    postById
 
 }

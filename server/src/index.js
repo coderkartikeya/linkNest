@@ -1,36 +1,63 @@
-
-import dotenv from 'dotenv'
-import express from 'express'
-import connectDb from './db/index.js';
+import dotenv from 'dotenv';
+import express from 'express';
 import { app } from './app.js';
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
+import connectDb from './db/index.js';
+import http from 'http';
+import { Server } from 'socket.io';
+
 dotenv.config();
 
+const port = process.env.PORT || 3001;
 
-const port=process.env.PORT || 3001
+// Create HTTP server with Express app
+const server = http.createServer(app);
 
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: ['http://localhost:3000', 'https://link-nest-backend.vercel.app/'],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
 
-/*
-;(async()=>{
-    try {
-        mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-        app.on("error",()=>{
-            console.log("error",errro);
-            throw error
-        })
-    } catch (error) {
-        console.error(error);
-        throw error
-    }
-})();
-*/
+// Store active users
+const users = {};
+
+io.on('connection', (socket) => {
+  console.log('New user connected:', socket.id);
+
+  // Handle user joining a chat room
+  socket.on('joinRoom', ({ userId, groupId }) => {
+    socket.join(groupId);
+    users[socket.id] = { userId, groupId };
+    console.log(`User ${userId} joined room ${groupId}`);
+  });
+
+  // Handle sending messages
+  socket.on('sendMessage', (messageData) => {
+    const { groupId, message } = messageData;
+
+    // Broadcast message to users in the room
+    io.to(groupId).emit('receiveMessage', messageData);
+  });
+
+  // Handle user disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+    delete users[socket.id];
+  });
+});
+
+// Connect to MongoDB and start the server
 connectDb()
-.then(()=>{
-    app.listen(port,()=>{
-        console.log("server is running")
-    })
-})
-.catch((err)=>{
-    console.log("mongo db error")
-})
+  .then(() => {
+    server.listen(port, () => {
+      console.log(`🚀 Server is running on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log('❌ MongoDB Connection Error:', err);
+  });
+
+export { io };

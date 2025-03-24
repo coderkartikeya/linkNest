@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import ResponsiveTabBar from '../components/TabBar';
+import { Post } from '../Interfaces/Post';
 
 interface User {
   _id:string;
@@ -26,7 +27,8 @@ const Page = () => {
   const [updatedName, setUpdatedName] = useState('');
   const [updatedProfilePic, setUpdatedProfilePic] = useState<string | null>(null);
   const [joiningDate, setJoiningDate] = useState('');
-  const [posts, setPosts] = useState<string[]>([]); // Sample posts
+  const [posts, setPosts] = useState<Post[]>([]); // Sample posts
+  const form= new FormData();
 
   useEffect(() => {
     try {
@@ -37,22 +39,28 @@ const Page = () => {
         setUpdatedName(parsedUser .data.user.fullName);
         setUpdatedProfilePic(parsedUser .data.user.profilePic);
         setJoiningDate(parsedUser .data.user.dateCreatedAt || 'Unknown');
+        form.append("id",user?.data.user._id);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
     }
   }, []);
+  // console.log(user?.data.user._id)
   useEffect(()=>{
     const func=async()=>{
-      const response = await fetch('http://localhost/api/v1/community/selectedPosts',{
+      
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/users/post`,{
         method: 'POST',
-        headers: {
+        headers:{
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ownerId: user?.data.user._id})       
+        }
+        ,
+        body: JSON.stringify({id:user?.data.user._id})        
 
       });
       const data = await response.json();
+      console.log(data)
       setPosts(data);
       
     }

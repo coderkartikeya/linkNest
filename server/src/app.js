@@ -19,7 +19,10 @@ app.use(express.static("public"))
 
 import useRouter from './routes/user.routes.js'
 import useCommunity from './routes/community.routes.js'
+import useMessages from './routes/message.routes.js'
 // routes /api/version/kahan janan h 
 app.use("/api/v1/users",useRouter);
 app.use("/api/v1/community",useCommunity);
+app.use("/api/v1/messages",useMessages);
+
 export {app}
