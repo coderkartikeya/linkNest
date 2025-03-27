@@ -12,7 +12,7 @@ const port = process.env.PORT || 3001;
 // Create HTTP server with Express app
 const server = http.createServer(app);
 
-// Initialize Socket.IO
+// ✅ Initialize Socket.IO with Correct CORS
 const io = new Server(server, {
   cors: {
     origin: ['http://localhost:3000', 'https://link-nest-frontend-chi.vercel.app'],
@@ -37,8 +37,6 @@ io.on('connection', (socket) => {
   // Handle sending messages
   socket.on('sendMessage', (messageData) => {
     const { groupId, message } = messageData;
-
-    // Broadcast message to users in the room
     io.to(groupId).emit('receiveMessage', messageData);
   });
 
@@ -49,7 +47,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Connect to MongoDB and start the server
+// ✅ Connect to MongoDB and Start Server
 connectDb()
   .then(() => {
     server.listen(port, () => {
