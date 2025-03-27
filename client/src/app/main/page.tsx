@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Share2, Clock, Inbox } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ResponsiveTabBar from '../components/TabBar';
-import { error } from 'console';
+
+import Image from 'next/image';
 
 
 interface User {
@@ -195,10 +196,12 @@ const Page: React.FC = () => {
               <div className="mb-4">
                 <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
                 {post.picture && (
-                  <img
+                  <Image
                     src={post.picture}
                     alt="Post content"
                     className="mt-4 rounded-lg w-full object-cover max-h-96"
+                    height={500}
+                    width={500}
                   />
                 )}
               </div>

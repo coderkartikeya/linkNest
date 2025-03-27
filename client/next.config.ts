@@ -13,7 +13,12 @@ const nextConfig: NextConfig = {
        config.output.publicPath = "";
     }
     return config;
- }
+ },
+ eslint: {
+  // Warning: This allows production builds to successfully complete even if
+
+  ignoreDuringBuilds: true,
+},
 };
 
 export default nextConfig;

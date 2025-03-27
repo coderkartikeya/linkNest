@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 
 const LocalNetworkSection = () => {
@@ -47,10 +48,13 @@ const LocalNetworkSection = () => {
             <p className="text-green-600 mb-4">AI-Powered Community Support</p>
             <p className="text-green-500 font-medium">Discover More</p>
           </div>
-          <img
+          <Image
             src="/images/ai_main_website.jpg"
             alt="AI support"
             className="w-full md:w-1/2 object-cover"
+            height={500}
+            width={500}
+            
           />
         </div>
       </div>

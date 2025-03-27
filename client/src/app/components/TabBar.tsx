@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, User, TrendingUp, Users, CompassIcon, LogInIcon, LogOutIcon } from 'lucide-react';
+import { Home, User, TrendingUp, Users, CompassIcon, LogOutIcon } from 'lucide-react';
 
 export default function ResponsiveTabBar() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function ResponsiveTabBar() {
     setActiveTab(currentPath);
   }, [pathname]);
 
-  const handleTabClick = (href:any) => {
+  const handleTabClick = (href:string) => {
     if(href=='/login'){
       localStorage.clear();
     }

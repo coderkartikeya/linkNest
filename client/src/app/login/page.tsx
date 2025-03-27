@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useUserContext } from '@/context/UserContext';
 // import Router from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 
 
@@ -19,7 +20,7 @@ export default function Login() {
   const router=useRouter();
   // console.log(process.env.NEXT_PUBLIC_ADDRESS)
 
-  const handleSubmit = async (e:any) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     try {
       
@@ -49,10 +50,12 @@ export default function Login() {
       </Head>
       <div className="bg-white shadow-lg rounded-lg p-8 flex flex-col md:flex-row w-full max-w-4xl">
         <div className="md:w-1/2 flex items-center justify-center bg-blue-100 rounded-lg">
-          <img
+          <Image
             src="/images/login_page.jpg"
             alt="Illustration"
             className="w-3/4 h-auto md:w-full md:h-auto object-cover rounded-lg"
+            height={500}
+            width={500}
           />
         </div>
         <div className="md:w-1/2 mt-8 md:mt-0 px-6">

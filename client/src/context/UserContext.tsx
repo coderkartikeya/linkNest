@@ -1,5 +1,6 @@
 'use client';
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, SetStateAction } from 'react';
+
 
 interface UserContextType {
   username: string;
@@ -9,8 +10,17 @@ interface UserContextType {
   accessToken: string;
   profilePic: string;
   createdOn: string;
-  setUserContext: (data: any) => void;
+  setUserContext: (data: {
+    username: string;
+    fullName: string;
+    email: string;
+    refreshToken: string;
+    accessToken: string;
+    profilePic: string;
+    createdOn: string;
+  }) => void;
 }
+
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -32,7 +42,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const setUserContext = (data: any) => {
+  const setUserContext = (data: SetStateAction<{ username: string; fullName: string; email: string; refreshToken: string; accessToken: string; profilePic: string; createdOn: string; }>) => {
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
   };

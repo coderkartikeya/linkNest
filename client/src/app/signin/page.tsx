@@ -2,28 +2,40 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+interface formData{
+  fullName:string;
+  username:string;
+  email:string;
+  password:string;
+  profilePic:File | null;
+}
 
 const FormComponent = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<formData>({
     fullName: '',
     username: '',
     email: '',
     password: '',
     profilePic: null,
   });
-  const [worker, setWorker] = useState<Worker | null>(null);
+  
   // creation of router to push on login screen when profile is created
   const router=useRouter();
-  const handleChange = (e:any) => {
+  const handleChange = (e: { target: { name: string; value: string; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleFileChange = (e:any) => {
-    setFormData({ ...formData, profilePic: e.target.files[0] });
+  const handleFileChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.files?.[0]){
+      
+      setFormData({ ...formData, profilePic: e.target.files[0] });
+    }
   };
 
-  const handleSubmit =  async(e:any) => {
+  const handleSubmit =  async(e: { preventDefault: () => void; }) => {
     e.preventDefault();
     const {fullName,username,email,password,profilePic}=formData;
     if((fullName||username||email||password)===''){
@@ -64,10 +76,12 @@ const FormComponent = () => {
   return (
     <div className='flex flex-col md:flex-row justify-center items-center bg-slate-100 h-screen w-screen p-5'>
       <div className='flex md:w-1/2 md:h-full h-1/3 justify-center items-center w-full relative '>
-  <img
+  <Image
     src='/images/signin.jpg'
     alt='image'
     className='absolute inset-0 w-full h-full '
+    height={500}
+    width={500}
   />
   <div>
   <h1 className='relative text-white font-bold text-5xl md:text-8xl'>LinkNest</h1>

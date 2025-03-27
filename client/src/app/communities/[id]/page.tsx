@@ -45,7 +45,7 @@ interface Community {
   group: string;
   isPrivate: boolean;
   members: string[];
-  posts: any[];
+  posts: string[];
   createdOn: Date;
   reportCommunity: boolean;
   __v: number;
@@ -261,7 +261,7 @@ const CommunityPage = () => {
                   placeholder="Type a message..."
                   className="w-full text-sm md:text-base resize-none rounded-lg pl-3 pr-10 py-2 focus:outline-none border focus:ring-2 focus:ring-blue-500 min-h-[40px] md:min-h-[45px]"
                   rows={1}
-                  onKeyPress={handleKeyPress}
+                  
                 />
                 <label className="absolute right-2 bottom-2 cursor-pointer">
                   <input

@@ -20,6 +20,54 @@ interface UserData {
 interface AuthenticatedUser  {
   data: UserData;
 }
+import Link from "next/link";
+import Image from 'next/image';
+
+const CommunityPosts = ({ posts }: { posts: Post[] }) => {
+  return (
+    <div className="mt-8">
+      <h2 className="text-2xl font-bold mb-4 text-gray-900">Community Posts</h2>
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <Link 
+              key={post._id} 
+              href={`/communities/${post.community}`} 
+              className="block border-b border-gray-200 py-3 transition duration-300 hover:bg-gray-100 rounded-md px-3"
+            >
+              <div className="flex items-start space-x-3">
+                {post.picture && (
+                  <Image 
+                    src={post.picture} 
+                    alt="Post" 
+                    className="w-12 h-12 rounded-full object-cover"
+                    height={500}
+                    width={500}
+                  />
+                )}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{post.ownerName}</h3>
+                  <p className="text-gray-700">{post.content}</p>
+                  <div className="flex items-center text-sm text-gray-500 mt-1">
+                    <span>❤️ {post.likes || 0}</span>
+                    <span className="mx-2">·</span>
+                    <span>💬 {post.comments || 0}</span>
+                    <span className="mx-2">·</span>
+                    <span>{new Date(post.createdAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center py-4">No posts available.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
 
 const Page = () => {
   const [user, setUser ] = useState<AuthenticatedUser  | null>(null);
@@ -28,7 +76,7 @@ const Page = () => {
   const [updatedProfilePic, setUpdatedProfilePic] = useState<string | null>(null);
   const [joiningDate, setJoiningDate] = useState('');
   const [posts, setPosts] = useState<Post[]>([]); // Sample posts
-  const form= new FormData();
+  
 
   useEffect(() => {
     try {
@@ -39,13 +87,13 @@ const Page = () => {
         setUpdatedName(parsedUser .data.user.fullName);
         setUpdatedProfilePic(parsedUser .data.user.profilePic);
         setJoiningDate(parsedUser .data.user.dateCreatedAt || 'Unknown');
-        form.append("id",user?.data.user._id);
+        
       }
     } catch (error) {
       console.error('Error loading user data:', error);
     }
   }, []);
-  // console.log(user?.data.user._id)
+  const userId=user?.data.user._id;
   useEffect(()=>{
     const func=async()=>{
       
@@ -56,16 +104,16 @@ const Page = () => {
           'Content-Type': 'application/json',
         }
         ,
-        body: JSON.stringify({id:user?.data.user._id})        
+        body: JSON.stringify({id:userId})        
 
       });
       const data = await response.json();
-      console.log(data)
-      setPosts(data);
+      console.log(data.message)
+      setPosts(data.message);
       
     }
     func();
-  },[])
+  },[user])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,10 +162,12 @@ const Page = () => {
           {/* Profile Picture */}
           <div className="bg-gray-200 rounded-lg shadow-lg p-4 flex md:w-[300px] w-full">
             {updatedProfilePic && (
-              <img
+              <Image
                 src={updatedProfilePic}
                 alt={`${updatedName}'s profile`}
                 className="h-full w-full rounded-lg object-cover"
+                height={500}
+                width={500}
               />
             )}
           </div>
@@ -185,20 +235,7 @@ const Page = () => {
         </div>
 
         {/* Community Posts Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Community Posts</h2>
-          <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-            {posts.length > 0 ? (
-              posts.map((post, index) => (
-                <div key={index} className="border-b border-gray-200 py-2">
-                  <p className="text-gray-800">{post}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No posts available.</p>
-            )}
-          </div>
-        </div>
+        <CommunityPosts posts={posts}/>
       </div>
     </div>
   );

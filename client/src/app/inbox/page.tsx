@@ -57,8 +57,11 @@ const Page = () => {
         <h1 className='md:text-4xl md:p-5 m-3 text-2xl'>Groups you Joined!</h1>
 
         {
-          chatGroups && chatGroups.map((r)=>{
+          chatGroups && chatGroups.map((r,index)=>{
             return(
+              <div key={r._id|| index}>
+              { r && (
+              
               <Link key={r._id} href={`/inbox/${r._id}`}>
               <div 
            
@@ -79,7 +82,7 @@ const Page = () => {
         </div>
         </Link>
 
-            )
+          )}</div>)
           })
           
         }

@@ -36,11 +36,10 @@ interface ChatCProps {
 
 const ChatC: React.FC<ChatCProps> = ({ messages, user }) => {
     const [newMessage, setNewMessage] = useState('');
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [editingMessageIndex, setEditingMessageIndex] = useState<number | null>(null);
+    
 
     const handleEditMessage = (index: number) => {
-        setEditingMessageIndex(index);
+        // setEditingMessageIndex(index);
         setNewMessage(messages[index].content);
     };
 
@@ -53,8 +52,7 @@ const ChatC: React.FC<ChatCProps> = ({ messages, user }) => {
         // Implement send message logic here
         console.log('Send message:', newMessage);
         setNewMessage('');
-        setSelectedFile(null);
-        setEditingMessageIndex(null);
+        
     };
 
     const formatDate = (date: Date) => {

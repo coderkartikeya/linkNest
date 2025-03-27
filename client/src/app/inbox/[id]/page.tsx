@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation';
 import React, { useEffect, useState, useRef } from 'react';
 import { Message } from '@/app/Interfaces/Message';
 import io from "socket.io-client";
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 
 interface User {
   _id: string;
@@ -23,6 +26,9 @@ interface UserData {
 interface AuthenticatedUser {
   data: UserData;
 }
+interface IsMember{
+  isMember: boolean;
+}
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER!, { withCredentials: true });
 
@@ -38,6 +44,8 @@ const Page = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [isMember,setIsMember]=useState<IsMember>();
+  const router=useRouter();
 
   // Get user from localStorage on component mount
   useEffect(() => {
@@ -63,6 +71,7 @@ const Page = () => {
         });
         const data = await res.json();
         setGroup(data.message);
+        
       } catch (error) {
         console.error('Error fetching chat group:', error);
       }
@@ -70,8 +79,16 @@ const Page = () => {
     
     fetchGroup();
   }, [communityId, user]);
+  const userId:string =user?.data.user._id!;
+  useEffect(()=>{
+    if(userId){
+      setIsMember({isMember:group?.members.includes(userId) || group?.admin==userId ||false});
+    }
+  },[userId,group])
+  
+  
 
-  const userId = user?.data.user._id;
+  
   const groupId = group?._id;
 
   // Socket connection and message handling
@@ -268,13 +285,24 @@ const Page = () => {
       </div>
       <div className='flex flex-col w-full h-90vh md:m-5 m-2 overflow-hidden'>
         {/* Header */}
-        <div className='bg-white rounded-t-xl p-4 shadow-sm flex-shrink-0'>
+        <div className='bg-white rounded-t-xl p-4 shadow-sm flex justify-between'>
+
+          <button
+          onClick={()=>{
+            router.back();
+          }}
+          >
+            <ArrowLeft/>
+
+          </button>
+          <div>
           <h2 className='font-bold text-xl text-gray-800'>
             {group?.name || 'Chat Group'}
           </h2>
           <p className='text-sm text-gray-500'>
             {group?.members?.length || 0} members
           </p>
+          </div>
         </div>
         
         {/* Messages container */}
@@ -348,10 +376,12 @@ const Page = () => {
                         {/* Image */}
                         {message.image && (
                           <div className='mb-2 rounded-lg overflow-hidden'>
-                            <img 
+                            <Image 
                                 src={message.image instanceof File ? URL.createObjectURL(message.image) : message.image} 
                                 alt="Shared image" 
                                 className="max-w-full h-auto max-h-48 object-contain"
+                                height={500}
+                                width={500}
                               />
 
                           </div>
@@ -418,6 +448,7 @@ const Page = () => {
         )}
         
         {/* Message input */}
+        { isMember && (
         <div className='bg-white rounded-b-xl p-2 border-t border-gray-200 flex-shrink-0 mb-20 md:mb-1'>
           <form onSubmit={handleSendMessage} className='flex gap-1 items-center'>
             <button 
@@ -462,8 +493,9 @@ const Page = () => {
               )}
             </button>
           </form>
-        </div>
+        </div>)}
       </div>
+            
     </div>
   );
 };

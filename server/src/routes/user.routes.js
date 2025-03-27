@@ -1,5 +1,5 @@
 import express from "express";
-import { getChatGroup, loginUser, logoutUser, postById, registerUser } from "../controllers/user.controllers.js";
+import { getChatGroup, loginUser, logoutUser, postById, registerUser,userD } from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
@@ -21,6 +21,6 @@ router.route("/login").post(loginUser)
 router.route("/logout").post(verifyJWT,logoutUser)
 router.route("/getGroup").post(getChatGroup);
 router.route("/post").post(postById);
-
+router.route('/profile').post(userD);
 
 export default router;

@@ -1,6 +1,7 @@
 import express from 'express'
 import { upload } from '../middlewares/multer.middlewares.js';
 import { addMemberToCommunity, communitByid, communityPost, communityPostsAll, deleteCommunity, getAllCommunities, getCommunitiesByCategory, getCommunitiesByUser, getMessage, registerCommunity, updateCommunityByName } from '../controllers/community.controllers.js';
+import { userD } from '../controllers/user.controllers.js';
 
 
 const router=express.Router();
@@ -17,6 +18,7 @@ router.route('/allposts').get(communityPostsAll);
 
 router.route('/deleteCommunity').post(deleteCommunity)
 router.route('/getmessage').post(getMessage);
+
 
 export default router;
 

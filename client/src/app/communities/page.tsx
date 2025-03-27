@@ -1,10 +1,11 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { PlusCircle, X } from "lucide-react";
 import ResponsiveTabBar from "../components/TabBar";
 import Link from "next/link";
-import axios from "axios";
+import { Community } from "../Interfaces/Community";
 
 interface User {
   _id: string;
@@ -24,14 +25,7 @@ interface AuthenticatedUser {
   data: UserData;
 }
 
-interface Community {
-  _id: number;
-  name: string;
-  description: string;
-  owner: string;
-  category: string;
-  profileImage?: string;
-}
+
 
 interface FormData {
   name: string;
@@ -39,6 +33,13 @@ interface FormData {
   owner: string;
   category: string;
   profileImage: File | null;
+  city:string;
+  state:string;
+  country:string;
+  ipAddress:{
+    lat:number,
+    lng:number
+  }
 }
 
 const Page = () => {
@@ -52,6 +53,15 @@ const Page = () => {
     owner: "",
     category: "",
     profileImage: null,
+    city:"",
+    state:"",
+    country:"",
+    ipAddress:{
+      lat:0,
+      lng:0
+
+    }
+
   });
 
   useEffect(() => {
@@ -127,6 +137,10 @@ const Page = () => {
     if (formData.profileImage) {
       formDataToSend.append("profileImage", formData.profileImage);
     }
+    formDataToSend.append("city",formData.city)
+    formDataToSend.append("country",formData.country)
+    formDataToSend.append("state",formData.state);
+    formDataToSend.append("ipAddress",JSON.stringify(formData.ipAddress));
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_ADDRESS}/api/v1/community/register`, {
@@ -141,7 +155,7 @@ const Page = () => {
       const data = await response.json();
       
       // Refresh communities list
-      setCommunities(prev => [...prev, data]);
+      setCommunities(prev => [...prev, data.data]);
       setIsModalOpen(false);
       setFormData({
         name: "",
@@ -149,11 +163,40 @@ const Page = () => {
         owner: user?.data.user._id || "",
         category: "",
         profileImage: null,
+        city:"",
+        country:"",
+        state:"",
+        ipAddress:{
+          lat:0,
+          lng:0
+        }
+
       });
       alert("Community created successfully!");
     } catch (error) {
       console.error("Error creating community:", error);
       setError("Failed to create community. Please try again.");
+    }
+  };
+  const handleLocationPermission = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData({
+            ...formData,
+            ipAddress: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+          });
+          alert("Location captured successfully!");
+        },
+        (error) => {
+          alert("Error capturing location. Please allow location access.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
     }
   };
 
@@ -212,6 +255,67 @@ const Page = () => {
                 accept="image/*"
                 required 
               />
+              <input
+                type="text"
+                name="city"
+                className="border p-2 rounded"
+                onChange={handleChange}
+                value={formData.city}
+                placeholder="City"
+              />
+              <input
+                type="text"
+                name="state"
+                className="border p-2 rounded"
+                onChange={handleChange}
+                value={formData.state}
+                placeholder="State"
+              />
+              <input
+                type="text"
+                name="country"
+                className="border p-2 rounded"
+                onChange={handleChange}
+                value={formData.country}
+                placeholder="Country"
+              />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  name="lat"
+                  placeholder="Latitude"
+                  className="border p-2 rounded w-1/2"
+                  value={formData.ipAddress.lat.toString() || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    ipAddress: {
+                      ...prev.ipAddress,
+                      lat: parseFloat(e.target.value) || 0
+                    }
+                  }))}
+                />
+                <input
+                      type="number"
+                      name="lng"
+                      placeholder="Longitude"
+                      className="border p-2 rounded w-1/2"
+                      value={formData.ipAddress.lng.toString()} // Convert to string
+                      onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          ipAddress: {
+                              ...prev.ipAddress,
+                              lng: parseFloat(e.target.value) || 0
+                          }
+                      }))}
+                  />
+              </div>
+              <button
+                type="button"
+                className="bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition-colors"
+                onClick={handleLocationPermission}
+              >
+                Get Location
+              </button>
               <button 
                 type="submit" 
                 className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
@@ -243,17 +347,19 @@ const Page = () => {
               Communities I've created
             </motion.h2>
             <div className="flex gap-5 overflow-x-auto scrollbar-hide">
-              {communities.map((community) => (
+              {communities.map((community,index) => (
                 <motion.div 
-                  key={community._id} 
+                  key={index} 
                   className="min-w-[250px] p-6 bg-blue-200 rounded-lg shadow-md hover:shadow-lg transition duration-300"
                 >
                   <Link href={`/communities/${community._id}`}>
                     {community.profileImage && (
-                      <img 
+                      <Image 
                         src={community.profileImage} 
                         alt={community.name}
                         className="h-[200px] w-full object-cover rounded-lg mb-3"
+                        width={500}
+                        height={500}
                       />
                     )}
                     <h3 className="text-lg font-bold">{community.name}</h3>

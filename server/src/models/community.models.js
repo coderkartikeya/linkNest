@@ -4,6 +4,7 @@ const communitySchema = new mongoose.Schema({
     name: { type: String, required: true,unique:true },
     createdOn: { type: Date, default: Date.now },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    username:{type:String,required:true},
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
     group:{type:mongoose.Schema.Types.ObjectId,ref:'ChatGroup',required:true},
     location:{

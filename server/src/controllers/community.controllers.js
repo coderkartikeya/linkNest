@@ -14,10 +14,13 @@ const registerCommunity=asyncHandler(async (req,res)=>{
     //image ko cloudinary par save karna h 
     // save kra kar check karo hua ki nhi 
     // response return karo
-    const {name,owner,location,description,category}=req.body;
+    const {name,owner,location,description,category,city,state,country,ipAddress}=req.body;
     // console.log(req.file);
     // console.log(owner);
-    if([name,owner,description,category].some((field)=>field?.trim()==="")){
+    if(!ipAddress){
+        return res.status(400).json({message:"IP Address is required"})
+    }
+    if([name,owner,description,category,city,state,country].some((field)=>field?.trim()==="")){
         throw new ApiError(400,"all fields are required");
     }
     // check if the image is valid
@@ -41,8 +44,8 @@ const registerCommunity=asyncHandler(async (req,res)=>{
     const chatGroup =await  ChatGroup.create({
         name: name,
         admin: user,
-        members: [user],
-        ProfilePic:imageUploaded.url
+        members: [],
+        ProfilePic:imageUploaded.url,
     })
     await chatGroup.save();
     // save the community to the database
@@ -50,23 +53,32 @@ const registerCommunity=asyncHandler(async (req,res)=>{
         name,
         owner:user,
         profileImage:imageUploaded.url,
+        username:user.username,
         description,
         category,
-        location :location || {},
-        group:chatGroup._id
+        location :{
+            country:country,
+        state:state,
+        city:city,
+        ipAddress:JSON.parse(ipAddress)
+        } || {},
+        group:chatGroup
+        
     })
     const newCommunityUploaded=await Community.findById(newCommunity._id);
+
     await user.updateOne({})
     
     if(!newCommunityUploaded){
         throw new ApiError(500,"something went wrong try again ");
     }
+    
     user.communities.push(newCommunity._id);
-    user.conversations.push(chatGroup._id);
+    
     await user.save();
     // return the response
     res.json(
-        new ApiResponse(200,"community created Successfully")
+        new ApiResponse(200,"community created Successfully",newCommunityUploaded)
     )
 
 
@@ -104,11 +116,11 @@ const getCommunitiesByCategory = asyncHandler(async (req, res) => {
     res.json(communities);
 });
 const addMemberToCommunity = asyncHandler(async (req, res) => {
-    const { communityName, username } = req.body;
+    const { communityId, username } = req.body;
 
     // Find the community by name
     // console.table({communityName,username})
-    const community = await Community.findOne({ name: communityName });
+    const community = await Community.findOne({ _id: communityId });
     if (!community) {
         throw new ApiError(404, "Community not found");
     }
@@ -123,16 +135,22 @@ const addMemberToCommunity = asyncHandler(async (req, res) => {
     if (community.members.includes(user._id)) {
         throw new ApiError(400, "User is already a member of the community");
     }
-    if(community.owner===user){
+    if(community.owner._id===user._id){
         throw new ApiError(400, "User is the owner of the community");
     }
 
     // Add the user to the community's members array
-    community.members.push(user._id);
+    community.members.push(user);
     await community.save();
-
+    
+    const g=await ChatGroup.findById(community.group);
+    g.members.push(user); 
+    await g.save();
     // Add the community to the user's communities array
-    user.communities.push(community._id);
+    user.communities.push(community);
+    user.conversations.push(community.group);
+    
+    
     await user.save();
 
     res.status(200).json(new ApiResponse(200, "Member added to community successfully"));
@@ -265,6 +283,7 @@ const deleteCommunity=asyncHandler(async (req,res)=>{
 const getMessage=asyncHandler(async(req,res)=>{
     const {id}=req.body;
     const group = await ChatGroup.findById(id);
+    
     if (!group) {
         throw new ApiError(404, "Message not found");
     }

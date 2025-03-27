@@ -5,7 +5,7 @@
     _id: string;
     name: string; 
     admin: string; 
-    members: []; 
+    members: string[]; 
     createdOn?: Date; 
     updatedOn?: Date; 
     messages?: []; 

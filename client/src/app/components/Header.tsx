@@ -2,19 +2,7 @@
 import React, { useRef } from 'react';
 
 const Header = () => {
-  const clickPoint = useRef<HTMLDivElement>(null);
-
-  const handleFocus = () => {
-    if (clickPoint.current) {
-      clickPoint.current.style.display = "none";
-    }
-  };
-
-  const handleBlur = () => {
-    if (clickPoint.current) {
-      clickPoint.current.style.display = "block";
-    }
-  };
+   
 
   return (
     <header className="bg-green-600 text-white p-4 shadow-lg">

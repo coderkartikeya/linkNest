@@ -5,6 +5,7 @@ import { ApiResponse } from '../utils/ApiResponse.js'
 import { uploadOnCloudinary } from '../utils/cloudinary.js'
 import ChatGroup from '../models/chatGroup.models.js'
 import Post from '../models/post.modules.js'
+import mongoose from "mongoose";
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
@@ -192,18 +193,44 @@ const getChatGroup = asyncHandler(async (req, res) => {
     if (!user) {
         return res.status(404).json(new ApiResponse(404, {}, "User not found"));
     }
+    
 
     // Find groups where user is a member
-    const groups = await ChatGroup.find({ members: user._id }).populate('members');
+    const groups = await ChatGroup.find({ admin: user._id });
+    const chatGroupIds = await Promise.all(user.conversations.map(async (e) => {
+        return await ChatGroup.findById(e);
+    }));
+    
+    const data=[]
+    if(groups){
+        data.push(...groups)
+    }
+    if(chatGroupIds){
+        data.push(...chatGroupIds)
+    }
+    
+    
+    // groups.push(user.conversations.map(async(e)=>await ChatGroup.findId(e)));
 
     // Return the groups as response
-    return res.status(200).json(new ApiResponse(200, groups, "Groups Retrieved Successfully"));
+    return res.status(200).json(new ApiResponse(200, data, "Groups Retrieved Successfully"));
 });
 
 const postById = asyncHandler(async(req,res)=>{
     const {id}=req.body;
+    const posts=await Post.find({owner:id});
+    
+    
+    res.json(new ApiResponse(200,"success",posts));
+})
+const userD = asyncHandler(async(req,res)=>{
+    const {id}=req.body;
     console.log(id);
-    res.json(new ApiResponse(200,"success"));
+    const user=await User.findById(id);
+    if(!user){
+        return res.status(404).json(new ApiResponse(404,"User not found"));
+    }
+    res.json(new ApiResponse(200,"User details",user));
 })
 
 
@@ -212,6 +239,7 @@ export {
     loginUser,
     logoutUser,
     getChatGroup,
-    postById
+    postById,
+    userD
 
 }

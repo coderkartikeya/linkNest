@@ -5,6 +5,8 @@ interface User {
     profilePic: string;
     accessToken: string;
     refreshToken: string;
+    communities:[{type:string}]
+
   }
   
   interface UserData {
