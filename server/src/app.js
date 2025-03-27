@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser'
 dotenv.config();
 
 const app=express();
-const allowedOrigins = ['http://localhost:3000', 'https://link-nest-backend.vercel.app/'];
+const allowedOrigins = ['http://localhost:3000', 'https://link-nest-frontend-chi.vercel.app','https://link-backend-seven.vercel.app'];
 app.use(cors({
     origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
