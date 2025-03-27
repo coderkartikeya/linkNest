@@ -61,3 +61,4 @@ connectDb()
   });
 
 export { io };
+export default server;
