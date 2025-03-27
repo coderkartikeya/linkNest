@@ -15,7 +15,7 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://link-nest-frontend-chi.vercel.app/'],
+    origin: ['http://localhost:3000', 'https://link-nest-frontend-chi.vercel.app'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
