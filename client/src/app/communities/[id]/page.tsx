@@ -106,6 +106,7 @@ const CommunityPage = () => {
         const data = await response.json();
         
         if (data.message) {
+          // console.log(data.message);
           setCommunity(data.message);
           setMessages(data.message.posts || []);
           // Check if the current user is the admin
@@ -122,6 +123,7 @@ const CommunityPage = () => {
     };
 
     fetchCommunity();
+    // console.log(community?.members)
   }, [communityId, user]);
 
   // Handlers

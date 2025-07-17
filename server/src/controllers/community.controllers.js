@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import mongoose from "mongoose";
 
 import Community from "../models/community.models.js"
 import { User} from "../models/User.models.js"
@@ -120,6 +121,7 @@ const addMemberToCommunity = asyncHandler(async (req, res) => {
 
     // Find the community by name
     // console.table({communityName,username})
+    // console.log(communityId,username);
     const community = await Community.findOne({ _id: communityId });
     if (!community) {
         throw new ApiError(404, "Community not found");
@@ -201,13 +203,36 @@ const getCommunitiesByUser = asyncHandler(async (req, res) => {
     }
 
     // Find all communities created by the user
+    const user=await User.findOne({ _id: userId });
     const communities = await Community.find({ owner: userId });
+    // now all commmunities user is a member of
+    // but members is an array of user ids
+    const userCommunities=[]
+    // console.log(user)
+    if(user.communities && user.communities.length>0){
+        for(let i=0;i<user.communities.length;i++){
+            const id = new mongoose.Types.ObjectId(user.communities[i])
+        const community = await Community.findById(id);
+        if(community){
+            userCommunities.push(community);
+        }
+    }
+    }
+
+    // console.log(communities, userCommunities);
+    
+
+
+    const allCommunities={
+        createdByUser: communities,
+        userIsMemberOf: userCommunities
+    }
     
     // if (!communities) {
     //     throw new ApiError(404, "No communities found for this user");
     // }
 
-    res.json(new ApiResponse(200, "Community updated successfully", communities));
+    res.json(new ApiResponse(200, "Community updated successfully", allCommunities));
 });
 
 const communitByid=asyncHandler(async(req,res)=>{
